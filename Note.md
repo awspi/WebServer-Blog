@@ -163,6 +163,10 @@ server.listen(3000,()=>{
 })
 ```
 
+##### promise
+
+post请求是异步的，需要理解promise
+
 
 
 #### nodejs处理路由
@@ -240,7 +244,9 @@ server.listen(3000,()=>{
 
 #### 初始化路由
 
-- www.js
+本部分代码为刚创建时的简单实现，不包含后续更新，只作理解
+
+- **www.js**  createServer的逻辑和业务没关系
 
 ```js
 const http = require('http')
@@ -252,7 +258,7 @@ const server = http.createServer(serverHandle)
 server.listen(PORT)
 ```
 
-- app.js
+- **app.js**  基本设置、返回类型、获取path、处理路由 
 
 ```js
 const handleBlogRouter=require('./src/router/blog')
@@ -266,7 +272,7 @@ const serverHandle=(req, res) => {
   const url=req.url
   req.path=url.split('?')[0]
 
-  //处理blog输路由
+  //处理blog路由
   const blogData=handleBlogRouter(req,res)
   if(blogData){
     res.end(
@@ -294,7 +300,7 @@ module.exports=serverHandle
 
 
 
-- blog.js
+- **blog.js** 只负责路由：获取路由，返回正确的格式，其他不参与
 
 ```js
 const handleBlogRouter=(req,res)=>{
@@ -339,7 +345,7 @@ const handleBlogRouter=(req,res)=>{
 module.exports=handleBlogRouter
 ```
 
-- user.js
+- **user.js**
 
 ```js
 const handleUserRouter = (req, res) => {
@@ -357,6 +363,92 @@ const handleUserRouter = (req, res) => {
 module.exports = handleUserRouter
 ```
 
-#### Model
+#### model
 
-- resmodel.js
+数据模型
+
+只关心数据格式
+
+- **resModel.js**
+
+```js
+class BaseModel{
+  constructor(data,message){
+    if(typeof data==='string'){
+      this.message=data;
+      data=null
+      message=null
+    }
+    if(data){
+      this.data=data
+    }
+    if(message){
+      this.message=message
+    }
+  }
+}
+class SuccessModel extends BaseModel{
+  constructor(data,message){
+    super(data,message)
+    this.errNo=0
+  }
+}
+class ErrorModel extends BaseModel{
+  constructor(data,message){
+    super(data,message)
+    this.errNo=-1
+  }
+}
+module.exports={
+  SuccessModel,
+  ErrorModel
+}
+```
+
+
+
+#### controller 
+
+只关心数据
+
+- **blog.js**
+
+```js
+const getList=(author,keyword)=>{//获取博客列表
+  //返回假数据
+  return [
+    {
+      id:1,
+      title:'title1',
+      content:'content1',
+      createTime:1648569048,
+      author:'Pithy'
+    },
+    {
+      id:2,
+      title:'title2',
+      content:'content2',
+      createTime:1648569055,
+      author:'AWSPI'
+    }
+  ]
+}
+
+const getDetail=(id)=>{
+  return {
+    id:1,
+    title:'title1',
+    content:'content1',
+    createTime:1648569048,
+    author:'Pithy'
+  }
+}
+
+
+//返回的是对象，因为之后还有其他的函数
+module.exports={
+  getList,
+  getDetail
+}
+```
+
