@@ -34,7 +34,7 @@ const handleBlogRouter=(req,res)=>{
     }
   }
 
-  //更新一篇博客
+  //删除一篇博客
   if(method=='POST'&&req.path==='/api/blog/del'){
     return{
       msg:'这是删除一篇博客的接口'
