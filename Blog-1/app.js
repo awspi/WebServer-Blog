@@ -9,7 +9,9 @@ const getPostData=(req)=>{
       resolve({})
       return
     }
-    if(req.header['Content-Type']!=='application/json'){//不满足格式返回空
+
+    //headers不是header
+    if(req.headers['content-type'] !== 'application/json'){//不满足格式返回空
       resolve({})
       return
     }
@@ -40,20 +42,30 @@ const serverHandle=(req, res) => {
   req.path=url.split('?')[0]
 
   //解析 query
-  req.query=querystring.parse(url.split('?')[0])
+  req.query=querystring.parse(url.split('?')[1])
 
   //处理postData
   getPostData(req).then(postData=>{
     req.body=postData//之后可以通过req.body获取postData
 
     //处理blog路由
-    const blogData=handleBlogRouter(req,res)
-    if(blogData){
-      res.end(
-        JSON.stringify(blogData)
-      )
+    const blogResult=handleBlogRouter(req,res)
+      if(blogResult){
+        blogResult.then(blogData=>{
+        res.end(
+          JSON.stringify(blogData)
+        )
+      })
       return
-    }
+      }
+    
+    // const blogData=handleBlogRouter(req,res)
+    // if(blogData){
+    //   res.end(
+    //     JSON.stringify(blogData)
+    //   )
+    //   return
+    // }
 
     //处理user路由
     const userData=handleUserRouter(req,res)

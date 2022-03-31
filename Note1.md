@@ -240,6 +240,8 @@ server.listen(3000,()=>{
 
 - 从0搭建，不使用任何框架
 - 使用**nodemon**监测环境变化，自动重启node
+  -  npm run dev
+
 - 使用**cross-env**设置环境变量
 
 #### 初始化路由
@@ -522,3 +524,148 @@ const getPostData=(req)=>{
 
 ```
 
+#### 新建和更新博客路由
+
+##### 新建博客
+
+**controller**
+
+```js
+
+//新建博客
+const newBlog=(blogData={})=>{
+  //blogData为一个博客对象 包含 title content属性
+  
+  return {
+    id:3//表示新建博客插入到数据表里的id
+
+  }
+}
+
+```
+
+**router**
+
+```js
+  if(method=='POST'&&req.path==='/api/blog/new'){
+    const blogData=req.body
+    const data=newBlog(blogData)
+    return new SuccessModel(data)
+  }
+```
+
+
+
+##### 更新博客
+
+**controller**
+
+```js
+//更新博客
+const updateBlog=(id,blogData={})=>{
+  //id:要更新的博客id
+  //blogData为一个博客对象 包含 title content属性
+  console.log('update blog',id,blogData);
+  return true
+}
+
+```
+
+**router**
+
+```js
+//更新一篇博客
+  if(method=='POST'&&req.path==='/api/blog/update'){
+
+    const result=updateBlog(id,req.body)
+    if(result){
+      return new SuccessModel()
+    }else{
+      return new ErrorModel('update err')
+    }
+  }
+```
+
+#### 删除博客路由和登录路由
+
+
+
+##### 删除博客
+
+**controller**
+
+```js
+//新建博客
+const newBlog=(blogData={})=>{
+  //blogData为一个博客对象 包含 title content属性
+  
+  return {
+    id:3//表示新建博客插入到数据表里的id
+
+  }
+}
+
+```
+
+**router**
+
+```js
+  if(method=='POST'&&req.path==='/api/blog/new'){
+    const blogData=req.body
+    const data=newBlog(blogData)
+    return new SuccessModel(data)
+  }
+```
+
+
+
+##### 登陆
+
+**controller**
+
+```js
+//更新博客
+const updateBlog=(id,blogData={})=>{
+  //id:要更新的博客id
+  //blogData为一个博客对象 包含 title content属性
+  console.log('update blog',id,blogData);
+  return true
+}
+
+```
+
+**router**
+
+```js
+//更新一篇博客
+  if(method=='POST'&&req.path==='/api/blog/update'){
+
+    const result=updateBlog(id,req.body)
+    if(result){
+      return new SuccessModel()
+    }else{
+      return new ErrorModel('update err')
+    }
+  }
+```
+
+#### 总结
+
+- nodejs处理http请求的常用技能, postman的使用
+  - 获取url参数，路径 
+
+- nodejs开发博客项目的接口(未连接数据库,未使用登录)
+- 为何要将router和controller分开?
+  - router只负责路由相关 返回数据模版
+  - controller用于处理数据 包装
+
+#### 路由与API 区别
+
+
+
+**API:**
+前端和后端、不同端(子 系统)之间对接的一个术语
+url (路由)  `/api/blog/list` get 输入 输出
+**路由:**
+API的一部分
+后端系统内部的一个模块
