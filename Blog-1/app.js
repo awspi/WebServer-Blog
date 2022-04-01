@@ -2,6 +2,8 @@ const querystring=require('querystring')
 const handleBlogRouter=require('./src/router/blog')
 const handleUserRouter=require('./src/router/user')
 
+//session数据
+
 //用于处理post
 const getPostData=(req)=>{
   const promise = new Promise((resolve, reject) =>{
@@ -43,6 +45,20 @@ const serverHandle=(req, res) => {
 
   //解析 query
   req.query=querystring.parse(url.split('?')[1])
+
+  //解析cookie
+  req.cookie={}
+  const cookieStr=req.headers.cookie||'' //cookie
+  cookieStr.split(";").forEach(item =>{
+    if(!item){
+      return
+    }
+    const arr=item.split('=')
+    const key =arr[0].trim() //加个trim 去首尾空格
+    const val=arr[1].trim()
+    req.cookie[key]=val
+  })
+  // console.log(req.cookie)
 
   //处理postData
   getPostData(req).then(postData=>{
