@@ -123,3 +123,229 @@ Cookie 问题:
 
 ![session](/Users/wsp/Documents/NodeJs/WebServer-Blog/img/session.png)
 
+app.js
+
+```js
+//session数据
+const SESSION_DATA={}
+```
+
+```js
+//解析session
+  let needSetCookie=false
+  let userId=req.cookie.userid
+  if(userId) {
+    if(!SESSION_DATA[userId]) {
+      SESSION_DATA[userId]={}
+    }
+  }else{
+    needSetCookie=true
+    userId=`${Date.now()}_${Math.random()}`;//保证不重复
+    SESSION_DATA[userId]={}
+  }
+  req.session=SESSION_DATA[userId] 
+  console.log(req.session);
+```
+
+处理路由时检查需要setcookie
+
+```js
+if(needSetCookie){
+	res.setHeader('Set-cookie',`userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`)
+  }
+```
+
+router/user.js
+
+```js
+//设置session
+        req.session.username = data.username
+        req.session.realname=data.realname
+```
+
+```js
+//使用
+if(req.session.username)
+```
+
+
+
+**当前使用session的问题**
+
+- 目前session是js变量,放在nodejs内存中
+
+  - 进程内存有限,访问量大,内存暴增
+  - 正式上线是多线程,进程之间内存无法共享
+
+  <img src="/Users/wsp/Documents/NodeJs/WebServer-Blog/img/session-1.png" alt="session-1" style="zoom:80%;" />
+
+  <img src="/Users/wsp/Documents/NodeJs/WebServer-Blog/img/session-2.png" alt="session-2" style="zoom:80%;" />
+
+  <img src="/Users/wsp/Documents/NodeJs/WebServer-Blog/img/session-3.png" alt="session-3" style="zoom:80%;" />
+
+  
+
+  
+
+## redis
+
+- web server最常用的缓存数据库,数据存放在内存中
+- 相比于mysql,访问速度快(内存和硬盘不是一个数量级的 )
+- 但是成本更高,可存储的数据量更小(内存的硬伤)
+
+**session为何适用redis**
+
+- session访问频繁,对性能要求极高
+- session可不考虑断电丢失数据的问题(内存的硬伤)
+- session数据量不会太大(相比于mysql中存储的数据)
+
+**网站数据为何不适用redis**
+
+- 操作频率不是太高(相比于session操作)
+- 断电不能丢失,必须保留
+- 数据量太大，内存成本太高
+
+安装
+
+```
+brew install redis
+```
+
+启动
+
+```
+redis-server
+redis-cli
+```
+
+命令
+
+```
+set myname pithy
+get myname
+del myname
+keys *
+```
+
+
+
+### nodejs链接redis
+
+npm install默认安装的Redis client for Node.js为V4.0.0版本，一些接口已经改变,直接使用会提示`ClientClosedError`
+
+需要安装旧版本
+
+```bash
+npm uninstall --save redis //卸载新版本
+npm install --save redis@3.1.2 //安装旧版本
+```
+
+redis-test.js
+
+```js
+const redis = require('redis')
+//创建客户端
+const redisClient=redis.createClient(6379,'127.0.0.1')
+redisClient.on('error', err=>{
+  console.error(err)
+})
+
+//test
+redisClient.set('myname','pithy',redis.print)
+redisClient.get('myname',(err,val)=>{
+  if(err){
+    console.error(err)
+    return
+  }
+  console.log('val',val)
+  
+  //退出
+  redisClient.quit()
+})
+```
+
+conf/db.js
+
+```js
+let REDIS_CONFIG
+REDIS_CONFIG={
+    port:6379,
+    host: '127.0.0.1'
+  }
+```
+
+db/redis.js
+
+```js
+const redis= require('redis')
+ const {REDIS_CONFIG}= require('../conf/db')
+
+ //创建客户端
+ const redisClient=redis.createClient(REDIS_CONFIG.port,REDIS_CONFIG.host)
+ redisClient.on_connect('error',err=>{
+   console.error(err)
+ })
+
+ const set=(key,val)=>{
+   if(typeof val === 'object'){
+     val=JSON.stringify(val)
+   }
+  redisClient.set(key,val,redis.print)
+ }
+ const get=(key)=>{
+   const promise= new Promise((resolve, reject) =>{
+     redisClient.get(key,(err,val)=>{
+       if(err){
+         reject(err)
+         return
+       }
+       if(val==null){
+        resolve(null)
+        return
+       }
+       try {
+         resolve(JSON.parse(val))//返回json对象
+       } catch (error) {
+         resolve(val)
+       }
+
+     })
+   })
+   return promise
+}
+
+module.exports ={set,get}
+```
+
+## 完成登陆代码
+
+```js
+//登陆验证函数
+const loginCheck=(req)=>{
+  if(!req.session.username){
+    return Promise.resolve(new ErrorModel('未登陆'))
+  }
+}
+```
+
+```js
+   //查询登陆状态
+   const loginCheckResult =loginCheck(req)
+    if(loginCheckResult){
+      //未登陆
+      return loginCheck
+    }
+```
+
+
+
+## 联调
+
+http-server
+
+```
+npm i http-server -g
+http-server -p 9001
+
+```
+
