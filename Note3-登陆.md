@@ -341,11 +341,69 @@ const loginCheck=(req)=>{
 
 ## 联调
 
-http-server
+使用nginx
+
+前端 http-server
 
 ```
 npm i http-server -g
-http-server -p 9001
+http-server -p 8001
 
 ```
 
+### nginx配置
+
+- 高性能的web服务器,开源免费
+- 一般用于做静态服务、负载均衡
+- **反向代理** 
+
+![nginx1](/Users/wsp/Documents/NodeJs/WebServer-Blog/img/nginx1.png)
+
+**安装**
+
+```
+brew install nginx
+```
+
+**nginx命令**
+
+```
+测试配置文件格式是否正确 nginx -t
+启动 nginx
+重启 nginx -s reload
+停止 nginx -s stop
+```
+
+
+
+- nginx反向代理的配置
+
+查看配置文件所在目录
+
+`brew info nginx`
+
+​	The default port has been set in <u>/opt/homebrew/etc/nginx/nginx.conf</u> to 8080 so that
+
+打开配置文件
+
+`suodo vi /opt/homebrew/etc/nginx/nginx.conf`
+
+加入
+
+```nginx
+        location /{
+proxy_pass http://localhost:8001;
+}
+        location /api/{
+proxy_pass http://localhost.com:8000;
+proxy_set_header Host $host;
+}
+```
+
+
+
+## 总结
+
+- cookie是什么? session 是什么?如何实现登录?
+- redis在这里扮演什么角色?有什么核心的价值?
+- nginx的反向代理配置,联调过程中的作用

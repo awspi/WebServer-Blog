@@ -26,6 +26,15 @@ const handleBlogRouter=(req,res)=>{
   if(method=='GET'&&req.path==='/api/blog/list'){
    const author=req.query.author||''
    const keyword=req.query.keyword||''
+
+    if(req.query.isadmin){
+      const loginCheckResult=loginCheck(req)
+      if(loginCheckResult){
+        return loginCheckResult
+      }
+      author=req.session.username
+    }
+   
   //  const listData=getList(author,keyword)
   //  return new SuccessModel(listData)
     // 返回的是promise
@@ -48,7 +57,7 @@ const handleBlogRouter=(req,res)=>{
     const loginCheckResult =loginCheck(req)
     if(loginCheckResult){
       //未登陆
-      return loginCheck
+      return loginCheckResult
     }
 
 
@@ -67,7 +76,7 @@ const handleBlogRouter=(req,res)=>{
     const loginCheckResult =loginCheck(req)
     if(loginCheckResult){
       //未登陆
-      return loginCheck
+      return loginCheckResult
     }
 
     const result=updateBlog(id,req.body)
@@ -86,7 +95,7 @@ const handleBlogRouter=(req,res)=>{
     const loginCheckResult =loginCheck(req)
     if(loginCheckResult){
       //未登陆
-      return loginCheck
+      return loginCheckResult
     }
 
     const author=req.session.username 
