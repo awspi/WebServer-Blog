@@ -13,9 +13,11 @@ const handleUserRouter = (req, res) => {
   //登陆
   if(method ==='POST'&&req.path==='/api/user/login'){
     // const{username,password}=req.body
-    const {username,password}=req.query
+    const {username,password}=req.body
     const result=login(username,password)
+
     return result.then(data => {
+     
       if(data.username){
         //设置session
         req.session.username = data.username

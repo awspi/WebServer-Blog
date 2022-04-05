@@ -1,6 +1,7 @@
 const querystring=require('querystring')
 const handleBlogRouter=require('./src/router/blog')
 const handleUserRouter=require('./src/router/user')
+const {access}=require('./src/utils/log')
 
 //获取cookie过期时间
 const getCookieExpires =() =>{
@@ -44,6 +45,10 @@ const getPostData=(req)=>{
 }
 
 const serverHandle=(req, res) => {
+
+  //记录access log
+  access(`${req.method} -- ${req.url} -- ${req.headers['user-agent']}`)
+
   //设置返回格式
   res.setHeader('Content-Type', 'application/json')
 
@@ -81,7 +86,6 @@ const serverHandle=(req, res) => {
     SESSION_DATA[userId]={}
   }
   req.session=SESSION_DATA[userId] 
-  console.log(req.session);
 
   //处理postData
   getPostData(req).then(postData=>{
@@ -92,7 +96,7 @@ const serverHandle=(req, res) => {
       if(blogResult){
         blogResult.then(blogData=>{
           if(needSetCookie){
-            res.setHeader('Set-cookie',`userid=${username}; path=/; httpOnly; expires=${getCookieExpires()}`)
+            res.setHeader('Set-cookie',`userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`)
           }
         res.end(
           JSON.stringify(blogData)

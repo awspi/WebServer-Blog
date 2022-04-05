@@ -225,6 +225,7 @@ set myname pithy
 get myname
 del myname
 keys *
+shutdown 关闭
 ```
 
 
@@ -343,13 +344,27 @@ const loginCheck=(req)=>{
 
 使用nginx
 
-前端 http-server
+### 前端 http-server
 
 ```
 npm i http-server -g
 http-server -p 8001
 
 ```
+
+### 后端 nodemon
+
+```
+npm run dev
+```
+
+### 数据库redis
+
+```
+redis-server
+```
+
+
 
 ### nginx配置
 
@@ -386,7 +401,7 @@ brew install nginx
 
 打开配置文件
 
-`suodo vi /opt/homebrew/etc/nginx/nginx.conf`
+`sudo vi /opt/homebrew/etc/nginx/nginx.conf`
 
 加入
 
@@ -407,3 +422,23 @@ proxy_set_header Host $host;
 - cookie是什么? session 是什么?如何实现登录?
 - redis在这里扮演什么角色?有什么核心的价值?
 - nginx的反向代理配置,联调过程中的作用
+
+## 踩坑
+
+- 前端安装http-server 在blog目录下, -g安装总是失败,不加-g,安装后http-server无效命令,最后在系统终端安装成功
+
+- nginx配置,conf文件位置不一样,需要先查一下再修改
+
+  - conf localhost后面加了.com,导致没有效果,排查了很久
+
+- 后端
+
+  - 处理blog路由 needSetCookie,设置header时候userId写成username了
+
+    - 获取blog列表,已经登陆过的话不用再登陆if(!req.query.isadmin){}没写`!`
+
+  - user登陆函数const {username,password}=**req.body*写成*req.query了
+
+    
+
+​		

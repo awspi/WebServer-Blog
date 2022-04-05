@@ -17,17 +17,16 @@ const loginCheck=(req)=>{
 
 
 
-
 const handleBlogRouter=(req,res)=>{
   const method=req.method
   const id=req.query.id//id
 
   //获取博客列表
   if(method=='GET'&&req.path==='/api/blog/list'){
-   const author=req.query.author||''
+   let author=req.query.author||''
    const keyword=req.query.keyword||''
 
-    if(req.query.isadmin){
+    if(!req.query.isadmin){
       const loginCheckResult=loginCheck(req)
       if(loginCheckResult){
         return loginCheckResult
