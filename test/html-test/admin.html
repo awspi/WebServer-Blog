@@ -128,7 +128,7 @@
                 const url = '/api/blog/del?id=' + $target.attr('data-id')
                 post(url).then(res => {
                     if (res.errNo !== 0) {
-                        alert('操作错误')
+                        alert('只能删除自己的')
                         return
                     }
                     location.href = location.href
