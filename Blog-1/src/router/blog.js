@@ -47,7 +47,7 @@ const handleBlogRouter=(req,res)=>{
   if(method=='GET'&&req.path==='/api/blog/detail'){
     const result=getDetail(id)
     return result.then(data=>{
-      return new ErrorModel(data)
+      return new SuccessModel(data)
     })
   }
 
