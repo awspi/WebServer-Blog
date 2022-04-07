@@ -61,6 +61,8 @@
 
 ## 1.不使用任何框架开发
 
+![流程图](/Users/wsp/Documents/NodeJs/WebServer-Blog/img/流程图.png)
+
 ### 开发接口
 
 - nodejs处理http请求
