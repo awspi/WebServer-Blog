@@ -243,8 +243,13 @@ server.listen(3000,()=>{
 - 从0搭建，不使用任何框架
 - 使用**nodemon**监测环境变化，自动重启node
   -  npm run dev
-
 - 使用**cross-env**设置环境变量
+
+```bash
+ npm i nodemon cross-env --save-dev
+```
+
+
 
 #### 初始化路由
 
