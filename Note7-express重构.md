@@ -285,3 +285,116 @@ module.exports =(req,res,next)=>{
 }
 ```
 
+
+
+## 开发路由
+
+完善其他的路由
+
+routes/blog.js
+
+```js
+router.get('/list', function(req, res, next) {
+  let author = req.query.author || ''
+  const keyword = req.query.keyword || ''
+  if (req.query.isadmin) {
+    console.log('is admin')
+    // 管理员界面
+    if (req.session.username == null) {
+        console.error('is admin, but no login')
+        // 未登录
+        res.json(
+            new ErrorModel('未登录')
+        )
+        return
+    }
+    // 强制查询自己的博客
+    author = req.session.username
+}
+
+
+  const result = getList(author, keyword)
+  return result.then(listData => {//return result.then
+    res.json(
+      new SuccessModel(listData)
+    ) 
+  })
+});
+
+router.get('/detail', (req, res, next)=> {
+  const result = getDetail(req.query.id)
+  return result.then(data => {
+    res.json(new SuccessModel(data))
+  })
+  
+});
+
+router.post('/new',loginCheck, (req, res, next)=> {
+
+  const author = req.session.username
+  req.body.author = author
+  const blogData = req.body
+  const result = newBlog(blogData)
+  
+  return result.then(data => {
+    res.json(new SuccessModel(data))
+  })
+})
+
+router.post('/update',loginCheck, (req, res, next)=>{
+  const result = updateBlog(req.query.id, req.body)
+  return result.then(data => {
+    if (data) {
+      res.json(new SuccessModel())
+      
+    } else {
+      res.json(new ErrorModel('博客更新失败'))
+    }
+  })
+})
+
+router.post('/del',loginCheck, (req, res, next)=>{
+  console.log(1);
+  const author = req.session.username
+  const result = delBlog(req.query.id, author)
+  return result.then(data => {
+    if (data) {
+      res.json(new SuccessModel())
+    } else {
+      res.json(new ErrorModel('删除博客失败'))
+    }
+  })
+})
+```
+
+
+
+## 日志
+
+- access log 记录,直接使用脚手架推荐的 **morgan**
+- 自定义日志使用 console.log和console.err即可
+- 日志文件拆分、日志内容分析
+
+*https://github.com/expressjs/morgan*
+
+app.js
+
+```js
+var logger = require('morgan');//日志
+var path = require('path');
+const fs= require('fs')
+
+const ENV=process.env.NODE_ENV
+if(ENV!=='production'){
+  app.use(logger('dev'))
+}else{//线上环境
+    const logFileName=path.join(__dirname, 'logs','access.log')
+    const writestream=fs.createWriteStream(logFileName,{
+      flags:'a'
+    })
+    app.use(logger('combined',{
+      stream: writestream
+    }))
+}
+```
+

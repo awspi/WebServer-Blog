@@ -8,20 +8,26 @@ const {
   delBlog
 } = require('../controller/blog')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
+const loginCheck = require('../middleware/loginCheck')
 const { exec } = require('../db/mysql')
 
 router.get('/list', function(req, res, next) {
-  
   let author = req.query.author || ''
   const keyword = req.query.keyword || ''
-
-  // if (!req.query.isadmin) {
-  //   const loginCheckResult = loginCheck(req)
-  //   if (loginCheckResult) {
-  //     return loginCheckResult
-  //   }
-  //   author = req.session.username
-  // }
+  if (req.query.isadmin) {
+    console.log('is admin')
+    // 管理员界面
+    if (req.session.username == null) {
+        console.error('is admin, but no login')
+        // 未登录
+        res.json(
+            new ErrorModel('未登录')
+        )
+        return
+    }
+    // 强制查询自己的博客
+    author = req.session.username
+}
 
 
   const result = getList(author, keyword)
@@ -32,14 +38,50 @@ router.get('/list', function(req, res, next) {
   })
 });
 
-
-
-router.get('/detail', function(req, res, next) {
-  res.json({
-    errNo:0,
-    data:'haha'
+router.get('/detail', (req, res, next)=> {
+  const result = getDetail(req.query.id)
+  return result.then(data => {
+    res.json(new SuccessModel(data))
   })
   
 });
+
+router.post('/new',loginCheck, (req, res, next)=> {
+
+  const author = req.session.username
+  req.body.author = author
+  const blogData = req.body
+  const result = newBlog(blogData)
+  
+  return result.then(data => {
+    res.json(new SuccessModel(data))
+  })
+})
+
+router.post('/update',loginCheck, (req, res, next)=>{
+  const result = updateBlog(req.query.id, req.body)
+  return result.then(data => {
+    if (data) {
+      res.json(new SuccessModel())
+      
+    } else {
+      res.json(new ErrorModel('博客更新失败'))
+    }
+  })
+})
+
+router.post('/del',loginCheck, (req, res, next)=>{
+  console.log(1);
+  const author = req.session.username
+  const result = delBlog(req.query.id, author)
+  return result.then(data => {
+    if (data) {
+      res.json(new SuccessModel())
+    } else {
+      res.json(new ErrorModel('删除博客失败'))
+    }
+  })
+})
+
 
 module.exports = router;
