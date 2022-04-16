@@ -398,3 +398,12 @@ if(ENV!=='production'){
 }
 ```
 
+
+
+# express中间件
+
+ 分析
+
+- app.use用来注册中间件,先收集起来
+- 遇到http请求,根据path和method判断触发哪些
+- 实现next机制,即_上一个通过next触发下一个
